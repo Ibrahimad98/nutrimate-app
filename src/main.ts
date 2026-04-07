@@ -9,6 +9,9 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
+  // Global API prefix
+  app.setGlobalPrefix('api');
+
   // Enable global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
@@ -37,6 +40,15 @@ async function bootstrap() {
       },
       'JWT-auth',
     )
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: 'X-API-Key',
+        in: 'header',
+        description: 'Pre-shared API key for internal service access',
+      },
+      'X-API-Key',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -48,8 +60,7 @@ async function bootstrap() {
 
   const port = configService.get<number>('PORT', 3000);
   await app.listen(port);
-  console.log(`🚀 NutriMate API is running on http://localhost:${port}`);
-  console.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
+  console.log(`Application is running on: http://localhost:${port}/api`);
+  console.log(`Swagger docs: http://localhost:${port}/api/docs`);
 }
-
 bootstrap();

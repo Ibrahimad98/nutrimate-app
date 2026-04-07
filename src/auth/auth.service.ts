@@ -15,11 +15,13 @@ export class AuthService {
 
   async register(registerDto: RegisterDto) {
     const user = await this.usersService.create({
-      ...registerDto,
+      phone: registerDto.phone,
+      password: registerDto.password,
+      name: registerDto.name,
       role: UserRole.USER,
     });
 
-    const token = this.generateToken(user.id, user.email, user.role);
+    const token = this.generateToken(user.id, user.phone, user.role);
 
     return {
       message: 'Registration successful',
@@ -29,7 +31,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.usersService.findByEmail(loginDto.email);
+    const user = await this.usersService.findByPhone(loginDto.phone);
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -45,7 +47,7 @@ export class AuthService {
     }
 
     const { password, ...userWithoutPassword } = user;
-    const token = this.generateToken(user.id, user.email, user.role);
+    const token = this.generateToken(user.id, user.phone, user.role);
 
     return {
       message: 'Login successful',
@@ -54,8 +56,8 @@ export class AuthService {
     };
   }
 
-  private generateToken(userId: string, email: string, role: string): string {
-    const payload = { sub: userId, email, role };
+  private generateToken(userId: string, phone: string, role: string): string {
+    const payload = { sub: userId, phone, role };
     return this.jwtService.sign(payload);
   }
 }

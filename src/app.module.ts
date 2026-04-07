@@ -7,6 +7,7 @@ import { getDatabaseConfig } from './config/database.config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { UserBodyProfileModule } from './user-body-profile/user-body-profile.module';
+import { InternalModule } from './internal/internal.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserBodyProfileModule } from './user-body-profile/user-body-profile.mod
     UsersModule,
     AuthModule,
     UserBodyProfileModule,
+    InternalModule,
   ],
   controllers: [AppController],
   providers: [AppService],

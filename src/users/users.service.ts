@@ -18,12 +18,22 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
-    const existing = await this.usersRepository.findOne({
-      where: { email: createUserDto.email },
-    });
+    if (createUserDto.email) {
+      const existing = await this.usersRepository.findOne({
+        where: { email: createUserDto.email },
+      });
+      if (existing) {
+        throw new ConflictException('Email already in use');
+      }
+    }
 
-    if (existing) {
-      throw new ConflictException('Email already in use');
+    if (createUserDto.phone) {
+      const existingPhone = await this.usersRepository.findOne({
+        where: { phone: createUserDto.phone },
+      });
+      if (existingPhone) {
+        throw new ConflictException('Phone number already in use');
+      }
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -55,6 +65,18 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
+  async findByPhone(phone: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { phone } });
+  }
+
+  async findAllPhones(): Promise<string[]> {
+    const users = await this.usersRepository.find({
+      where: { isActive: true },
+      select: ['phone'],
+    });
+    return users.map((u) => u.phone).filter(Boolean);
+  }
+
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
@@ -70,6 +92,15 @@ export class UsersService {
       });
       if (existing) {
         throw new ConflictException('Email already in use');
+      }
+    }
+
+    if (updateUserDto.phone && updateUserDto.phone !== user.phone) {
+      const existing = await this.usersRepository.findOne({
+        where: { phone: updateUserDto.phone },
+      });
+      if (existing) {
+        throw new ConflictException('Phone number already in use');
       }
     }
 
