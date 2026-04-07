@@ -18,17 +18,18 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
-    const existing = await this.usersRepository.findOne({
-      where: { email: createUserDto.email },
-    });
-
-    if (existing) {
-      throw new ConflictException('Email already in use');
+    if (createUserDto.email) {
+      const existing = await this.usersRepository.findOne({
+        where: { email: createUserDto.email },
+      });
+      if (existing) {
+        throw new ConflictException('Email already in use');
+      }
     }
 
-    if (createUserDto.phone_number) {
+    if (createUserDto.phone) {
       const existingPhone = await this.usersRepository.findOne({
-        where: { phone_number: createUserDto.phone_number },
+        where: { phone: createUserDto.phone },
       });
       if (existingPhone) {
         throw new ConflictException('Phone number already in use');
@@ -64,8 +65,16 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  async findByPhoneNumber(phone_number: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { phone_number } });
+  async findByPhone(phone: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { phone } });
+  }
+
+  async findAllPhones(): Promise<string[]> {
+    const users = await this.usersRepository.find({
+      where: { isActive: true },
+      select: ['phone'],
+    });
+    return users.map((u) => u.phone).filter(Boolean);
   }
 
   async update(
@@ -86,9 +95,9 @@ export class UsersService {
       }
     }
 
-    if (updateUserDto.phone_number && updateUserDto.phone_number !== user.phone_number) {
+    if (updateUserDto.phone && updateUserDto.phone !== user.phone) {
       const existing = await this.usersRepository.findOne({
-        where: { phone_number: updateUserDto.phone_number },
+        where: { phone: updateUserDto.phone },
       });
       if (existing) {
         throw new ConflictException('Phone number already in use');
