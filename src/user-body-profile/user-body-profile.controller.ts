@@ -16,11 +16,12 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiBody,
+  ApiSecurity,
 } from '@nestjs/swagger';
 import { UserBodyProfileService } from './user-body-profile.service';
 import { CreateUserBodyProfileDto } from './dto/create-user-body-profile.dto';
 import { UpdateUserBodyProfileDto } from './dto/update-user-body-profile.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiKeyOrJwtAuthGuard } from '../auth/guards/api-key-or-jwt-auth.guard';
 
 const profileExample = {
   id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
@@ -36,7 +37,8 @@ const profileExample = {
 
 @ApiTags('User Body Profile')
 @ApiBearerAuth('JWT-auth')
-@UseGuards(JwtAuthGuard)
+@ApiSecurity('X-API-Key')
+@UseGuards(ApiKeyOrJwtAuthGuard)
 @Controller('users/:userId/body-profile')
 export class UserBodyProfileController {
   constructor(private readonly service: UserBodyProfileService) {}
@@ -68,9 +70,9 @@ export class UserBodyProfileController {
   @Get()
   @ApiOperation({ summary: 'Get body profile of a user' })
   @ApiParam({ name: 'userId', type: 'string', format: 'uuid', description: 'User UUID' })
-  @ApiResponse({ status: 200, description: 'Body profile found', schema: { example: profileExample } })
-  @ApiResponse({ status: 401, description: 'Unauthorized – JWT token required' })
-  @ApiResponse({ status: 404, description: 'User or body profile not found' })
+  @ApiResponse({ status: 200, description: 'Body profile data (empty object if not found)', schema: { example: profileExample } })
+  @ApiResponse({ status: 401, description: 'Unauthorized – authentication required' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   findByUserId(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.service.findByUserId(userId);
   }

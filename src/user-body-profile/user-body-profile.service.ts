@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserBodyProfile } from './entities/user-body-profile.entity';
@@ -38,10 +34,39 @@ export class UserBodyProfileService {
     return this.profileRepository.save(profile);
   }
 
-  async findByUserId(userId: string): Promise<UserBodyProfile> {
+  async findByUserId(userId: string): Promise<UserBodyProfile | object> {
     // ensure user exists
     await this.usersService.findOne(userId);
 
+    const profile = await this.profileRepository.findOne({
+      where: { userId },
+      relations: ['user'],
+    });
+    if (!profile) {
+      return {};
+    }
+    return profile;
+  }
+
+  async update(
+    userId: string,
+    dto: UpdateUserBodyProfileDto,
+  ): Promise<UserBodyProfile> {
+    const profile = await this.findByUserIdInternal(userId);
+    await this.profileRepository.update(profile.id, dto);
+    return this.profileRepository.findOne({
+      where: { id: profile.id },
+      relations: ['user'],
+    }) as Promise<UserBodyProfile>;
+  }
+
+  async remove(userId: string): Promise<{ message: string }> {
+    const profile = await this.findByUserIdInternal(userId);
+    await this.profileRepository.delete(profile.id);
+    return { message: `Body profile for user ${userId} deleted successfully` };
+  }
+
+  private async findByUserIdInternal(userId: string): Promise<UserBodyProfile> {
     const profile = await this.profileRepository.findOne({
       where: { userId },
       relations: ['user'],
@@ -52,23 +77,5 @@ export class UserBodyProfileService {
       );
     }
     return profile;
-  }
-
-  async update(
-    userId: string,
-    dto: UpdateUserBodyProfileDto,
-  ): Promise<UserBodyProfile> {
-    const profile = await this.findByUserId(userId);
-    await this.profileRepository.update(profile.id, dto);
-    return this.profileRepository.findOne({
-      where: { id: profile.id },
-      relations: ['user'],
-    }) as Promise<UserBodyProfile>;
-  }
-
-  async remove(userId: string): Promise<{ message: string }> {
-    const profile = await this.findByUserId(userId);
-    await this.profileRepository.delete(profile.id);
-    return { message: `Body profile for user ${userId} deleted successfully` };
   }
 }
