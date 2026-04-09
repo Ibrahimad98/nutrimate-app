@@ -68,9 +68,9 @@ export class UserBodyProfileController {
    * Get body profile of a user
    */
   @Get()
-  @ApiOperation({ summary: 'Get body profile of a user' })
+  @ApiOperation({ summary: 'Get body profile history of a user (array, ordered by latest)' })
   @ApiParam({ name: 'userId', type: 'string', format: 'uuid', description: 'User UUID' })
-  @ApiResponse({ status: 200, description: 'Body profile data (empty object if not found)', schema: { example: profileExample } })
+  @ApiResponse({ status: 200, description: 'Body profile history (empty array if none)', schema: { example: [profileExample] } })
   @ApiResponse({ status: 401, description: 'Unauthorized – authentication required' })
   @ApiResponse({ status: 404, description: 'User not found' })
   findByUserId(@Param('userId', ParseUUIDPipe) userId: string) {

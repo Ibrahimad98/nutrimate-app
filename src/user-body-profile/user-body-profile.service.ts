@@ -34,18 +34,16 @@ export class UserBodyProfileService {
     return this.profileRepository.save(profile);
   }
 
-  async findByUserId(userId: string): Promise<UserBodyProfile | object> {
+  async findByUserId(userId: string): Promise<UserBodyProfile[]> {
     // ensure user exists
     await this.usersService.findOne(userId);
 
-    const profile = await this.profileRepository.findOne({
+    const profiles = await this.profileRepository.find({
       where: { userId },
       relations: ['user'],
+      order: { createdAt: 'DESC' },
     });
-    if (!profile) {
-      return {};
-    }
-    return profile;
+    return profiles;
   }
 
   async update(
