@@ -45,17 +45,16 @@ export class UserBodyProfileController {
 
   /**
    * POST /users/:userId/body-profile
-   * Create body profile for a user
+   * Create a new body profile entry (history record) for a user
    */
   @Post()
-  @ApiOperation({ summary: 'Create body profile for a user' })
+  @ApiOperation({ summary: 'Create a new body profile entry for a user (supports history)' })
   @ApiParam({ name: 'userId', type: 'string', format: 'uuid', description: 'User UUID' })
   @ApiBody({ type: CreateUserBodyProfileDto })
-  @ApiResponse({ status: 201, description: 'Body profile created', schema: { example: profileExample } })
+  @ApiResponse({ status: 201, description: 'Body profile entry created', schema: { example: profileExample } })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized – JWT token required' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 409, description: 'Profile already exists for this user' })
   create(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body() dto: CreateUserBodyProfileDto,
@@ -65,7 +64,7 @@ export class UserBodyProfileController {
 
   /**
    * GET /users/:userId/body-profile
-   * Get body profile of a user
+   * Get full body profile history of a user (ordered by latest)
    */
   @Get()
   @ApiOperation({ summary: 'Get body profile history of a user (array, ordered by latest)' })
@@ -78,35 +77,41 @@ export class UserBodyProfileController {
   }
 
   /**
-   * PATCH /users/:userId/body-profile
-   * Update body profile of a user
+   * PATCH /users/:userId/body-profile/:profileId
+   * Update a specific body profile entry by its id
    */
-  @Patch()
-  @ApiOperation({ summary: 'Update body profile of a user' })
+  @Patch(':profileId')
+  @ApiOperation({ summary: 'Update a specific body profile entry by profileId' })
   @ApiParam({ name: 'userId', type: 'string', format: 'uuid', description: 'User UUID' })
+  @ApiParam({ name: 'profileId', type: 'string', format: 'uuid', description: 'Body profile entry UUID' })
   @ApiBody({ type: UpdateUserBodyProfileDto })
   @ApiResponse({ status: 200, description: 'Body profile updated', schema: { example: profileExample } })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized – JWT token required' })
-  @ApiResponse({ status: 404, description: 'User or body profile not found' })
+  @ApiResponse({ status: 404, description: 'User or body profile entry not found' })
   update(
     @Param('userId', ParseUUIDPipe) userId: string,
+    @Param('profileId', ParseUUIDPipe) profileId: string,
     @Body() dto: UpdateUserBodyProfileDto,
   ) {
-    return this.service.update(userId, dto);
+    return this.service.update(userId, profileId, dto);
   }
 
   /**
-   * DELETE /users/:userId/body-profile
-   * Delete body profile of a user
+   * DELETE /users/:userId/body-profile/:profileId
+   * Delete a specific body profile entry by its id
    */
-  @Delete()
-  @ApiOperation({ summary: 'Delete body profile of a user' })
+  @Delete(':profileId')
+  @ApiOperation({ summary: 'Delete a specific body profile entry by profileId' })
   @ApiParam({ name: 'userId', type: 'string', format: 'uuid', description: 'User UUID' })
-  @ApiResponse({ status: 200, description: 'Body profile deleted', schema: { example: { message: 'Body profile for user uuid deleted successfully' } } })
+  @ApiParam({ name: 'profileId', type: 'string', format: 'uuid', description: 'Body profile entry UUID' })
+  @ApiResponse({ status: 200, description: 'Body profile entry deleted', schema: { example: { message: 'Body profile uuid deleted successfully' } } })
   @ApiResponse({ status: 401, description: 'Unauthorized – JWT token required' })
-  @ApiResponse({ status: 404, description: 'User or body profile not found' })
-  remove(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.service.remove(userId);
+  @ApiResponse({ status: 404, description: 'User or body profile entry not found' })
+  remove(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+  ) {
+    return this.service.remove(userId, profileId);
   }
 }
