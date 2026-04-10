@@ -15,6 +15,7 @@ export interface ResponseEnvelope<T> {
     currentPage: number;
     totalPages: number;
     totalItems: number;
+    // TODO: implement real pagination (page, limit, totalPages) when needed
   };
 }
 
@@ -31,7 +32,11 @@ export class ResponseEnvelopeInterceptor<T>
 
     return next.handle().pipe(
       map((data) => {
+        // Only wrap on successful responses (2xx); skip wrapping for error responses
         const statusCode: number = response.statusCode ?? 200;
+        if (statusCode >= 400) {
+          return data;
+        }
 
         // If data is already wrapped (has status + code), pass through
         if (
@@ -47,7 +52,7 @@ export class ResponseEnvelopeInterceptor<T>
         if (Array.isArray(data)) {
           return {
             status: 'success',
-            code: statusCode,
+            code: 200,
             data,
             pagination: {
               currentPage: 1,
@@ -58,7 +63,11 @@ export class ResponseEnvelopeInterceptor<T>
         }
 
         // Null / empty object → wrap with empty array + pagination
-        if (data === null || data === undefined || (typeof data === 'object' && Object.keys(data).length === 0)) {
+        if (
+          data === null ||
+          data === undefined ||
+          (typeof data === 'object' && Object.keys(data).length === 0)
+        ) {
           return {
             status: 'success',
             code: 200,
@@ -74,7 +83,7 @@ export class ResponseEnvelopeInterceptor<T>
         // Single object
         return {
           status: 'success',
-          code: statusCode,
+          code: 200,
           data,
         };
       }),
