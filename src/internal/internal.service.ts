@@ -6,13 +6,17 @@ export class InternalService {
   constructor(private readonly usersService: UsersService) {}
 
   async getRegisteredPhones(): Promise<string[]> {
-    return this.usersService.findAllPhones();
+    const phones = await this.usersService.findAllPhones();
+    // Strip + prefix for consistency with Baileys & OTP flow
+    return phones.map((p) => p.replace(/^\+/, ''));
   }
 
   async getUserByPhone(phone: string) {
-    const user = await this.usersService.findByPhone(phone);
+    // Normalize: strip + prefix before lookup so both +628... and 628... work
+    const normalizedPhone = phone.replace(/^\+/, '');
+    const user = await this.usersService.findByPhone(normalizedPhone);
     if (!user) {
-      throw new NotFoundException(`User with phone ${phone} not found`);
+      throw new NotFoundException(`User with phone ${normalizedPhone} not found`);
     }
     const { password, ...result } = user;
     return result;
