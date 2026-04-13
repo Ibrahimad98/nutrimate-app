@@ -12,9 +12,16 @@ import { User } from './entities/user.entity';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET', 'nutrimate-secret-key'),
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const jwtSecret = configService.get<string>('JWT_SECRET');
+        if (!jwtSecret) {
+          throw new Error(
+            'JWT_SECRET environment variable is required. Please set it in your .env file.',
+          );
+        }
+
+        return { secret: jwtSecret };
+      },
     }),
   ],
   controllers: [UsersController],
