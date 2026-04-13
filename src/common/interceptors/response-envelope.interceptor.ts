@@ -94,7 +94,7 @@ export class ResponseEnvelopeInterceptor<T>
         // Plain array → use query params for page/limit, totalItems = data.length
         if (Array.isArray(data)) {
           const page = Math.max(1, Number(request.query?.page ?? 1));
-          const limit = Math.max(1, Number(request.query?.limit ?? data.length || 10));
+          const limit = Math.max(1, Number(request.query?.limit ? data.length : 10));
           return {
             status: 'success',
             code: 200,
