@@ -92,7 +92,7 @@ export class UsersController {
    */
   @Get(':id')
   @ApiOperation({ summary: 'Get a user by ID' })
-  @ApiParam({ name: 'id', type: string, format: 'uuid', description: 'User UUID' })
+  @ApiParam({ name: 'id', type: String, format: 'uuid', description: 'User UUID' })
   @ApiResponse({ status: 200, description: 'User found', schema: { example: userExample } })
   @ApiResponse({ status: 401, description: 'Unauthorized – authentication required' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -106,7 +106,7 @@ export class UsersController {
    */
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user by ID' })
-  @ApiParam({ name: 'id', type: string, format: 'uuid', description: 'User UUID' })
+  @ApiParam({ name: 'id', type: String, format: 'uuid', description: 'User UUID' })
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({ status: 200, description: 'User updated successfully', schema: { example: userExample } })
   @ApiResponse({ status: 400, description: 'Validation error' })
@@ -126,7 +126,7 @@ export class UsersController {
    */
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete a user by ID' })
-  @ApiParam({ name: 'id', type: string, format: 'uuid', description: 'User UUID' })
+  @ApiParam({ name: 'id', type: String, format: 'uuid', description: 'User UUID' })
   @ApiResponse({ status: 200, description: 'User soft-deleted successfully', schema: { example: { message: 'User uuid soft-deleted successfully' } } })
   @ApiResponse({ status: 401, description: 'Unauthorized – authentication required' })
   @ApiResponse({ status: 404, description: 'User not found' })
