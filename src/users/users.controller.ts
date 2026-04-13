@@ -50,9 +50,16 @@ export class UsersController {
   @Post()
   @ApiOperation({ summary: 'Create a user manually (admin use)' })
   @ApiBody({ type: CreateUserDto })
-  @ApiResponse({ status: 201, description: 'User created successfully', schema: { example: userExample } })
+  @ApiResponse({
+    status: 201,
+    description: 'User created successfully',
+    schema: { example: userExample },
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
-  @ApiResponse({ status: 401, description: 'Unauthorized – authentication required' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized – authentication required',
+  })
   @ApiResponse({ status: 409, description: 'Email already in use' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -78,7 +85,10 @@ export class UsersController {
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized – authentication required' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized – authentication required',
+  })
   findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
@@ -92,9 +102,21 @@ export class UsersController {
    */
   @Get(':id')
   @ApiOperation({ summary: 'Get a user by ID' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid', description: 'User UUID' })
-  @ApiResponse({ status: 200, description: 'User found', schema: { example: userExample } })
-  @ApiResponse({ status: 401, description: 'Unauthorized – authentication required' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    format: 'uuid',
+    description: 'User UUID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User found',
+    schema: { example: userExample },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized – authentication required',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);
@@ -106,11 +128,23 @@ export class UsersController {
    */
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user by ID' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid', description: 'User UUID' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    format: 'uuid',
+    description: 'User UUID',
+  })
   @ApiBody({ type: UpdateUserDto })
-  @ApiResponse({ status: 200, description: 'User updated successfully', schema: { example: userExample } })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated successfully',
+    schema: { example: userExample },
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
-  @ApiResponse({ status: 401, description: 'Unauthorized – authentication required' })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized – authentication required',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 409, description: 'Email already in use' })
   update(
@@ -126,9 +160,23 @@ export class UsersController {
    */
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete a user by ID' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid', description: 'User UUID' })
-  @ApiResponse({ status: 200, description: 'User soft-deleted successfully', schema: { example: { message: 'User uuid soft-deleted successfully' } } })
-  @ApiResponse({ status: 401, description: 'Unauthorized – authentication required' })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    format: 'uuid',
+    description: 'User UUID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User soft-deleted successfully',
+    schema: {
+      example: { message: 'User uuid soft-deleted successfully' },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized – authentication required',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);

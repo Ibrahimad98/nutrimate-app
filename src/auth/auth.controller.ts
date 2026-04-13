@@ -4,7 +4,6 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  Headers,
 } from '@nestjs/common';
 import {
   ApiTags,
