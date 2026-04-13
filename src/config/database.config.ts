@@ -13,6 +13,6 @@ export const getDatabaseConfig = (
   password: configService.get<string>('DB_PASSWORD', 'postgres'),
   database: configService.get<string>('DB_NAME', 'nutrimate-db'),
   entities: [User, UserBodyProfile],
-  synchronize: configService.get<string>('DB_SYNC', 'true') === 'true',
-  logging: configService.get<string>('DB_LOGGING', 'true') === 'true',
+  synchronize: configService.get<string>('DB_SYNC', 'false') === 'true',
+  logging: configService.get<string>('DB_LOGGING', 'false') === 'true',
 });

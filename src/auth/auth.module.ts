@@ -15,12 +15,21 @@ import { UsersModule } from '../users/users.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       // eslint-disable-next-line @typescript-eslint/require-await
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET', 'nutrimate-secret-key'),
-        signOptions: {
-          expiresIn: configService.get('JWT_EXPIRES_IN', '7d') as any,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const jwtSecret = configService.get<string>('JWT_SECRET');
+        if (!jwtSecret) {
+          throw new Error(
+            'JWT_SECRET environment variable is required. Please set it in your .env file.',
+          );
+        }
+
+        return {
+          secret: jwtSecret,
+          signOptions: {
+            expiresIn: configService.get('JWT_EXPIRES_IN', '7d') as any,
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],
