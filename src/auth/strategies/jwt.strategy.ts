@@ -5,24 +5,31 @@ import { ConfigService } from '@nestjs/config';
 
 export interface JwtPayload {
   sub: string;
-  email: string;
+  phone: string;
   role: string;
 }
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {
+    const jwtSecret = configService.get<string>('JWT_SECRET');
+    if (!jwtSecret) {
+      throw new Error(
+        'JWT_SECRET environment variable is required. Please set it in your .env file.',
+      );
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET', 'nutrimate-secret-key'),
+      secretOrKey: jwtSecret,
     });
   }
 
   async validate(payload: JwtPayload) {
     return {
       id: payload.sub,
-      email: payload.email,
+      phone: payload.phone,
       role: payload.role,
     };
   }

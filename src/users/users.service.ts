@@ -10,6 +10,13 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
+export interface PaginatedUsers {
+  items: Omit<User, 'password'>[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -50,6 +57,22 @@ export class UsersService {
   async findAll(): Promise<Omit<User, 'password'>[]> {
     const users = await this.usersRepository.find();
     return users.map(({ password, ...rest }) => rest as Omit<User, 'password'>);
+  }
+
+  async findPaginated(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<PaginatedUsers> {
+    const skip = (page - 1) * limit;
+    const [users, total] = await this.usersRepository.findAndCount({
+      skip,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+
+    const items = users.map(({ password, ...rest }) => rest as Omit<User, 'password'>);
+
+    return { items, total, page, limit };
   }
 
   async findOne(id: string): Promise<Omit<User, 'password'>> {
@@ -119,7 +142,33 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
+    // Soft delete — sets deletedAt timestamp instead of removing row
+    await this.usersRepository.softDelete(id);
+    return { message: `User ${id} soft-deleted successfully` };
+  }
+
+  async forceDelete(id: string): Promise<{ message: string }> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      withDeleted: true,
+    });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
     await this.usersRepository.delete(id);
-    return { message: `User ${id} deleted successfully` };
+    return { message: `User ${id} permanently deleted` };
+  }
+
+  async findByRefreshToken(refreshToken: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { refreshToken },
+    });
+  }
+
+  async setRefreshToken(
+    userId: string,
+    token: string | null,
+  ): Promise<void> {
+    await this.usersRepository.update(userId, { refreshToken: token });
   }
 }

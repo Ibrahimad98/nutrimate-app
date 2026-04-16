@@ -6,6 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  RelationId,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
@@ -31,7 +32,7 @@ export class UserBodyProfile {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column({ name: 'user_id' })
+  @RelationId((profile: UserBodyProfile) => profile.user)
   userId: string;
 
   @Column({ name: 'height_cm', type: 'decimal', precision: 5, scale: 2 })

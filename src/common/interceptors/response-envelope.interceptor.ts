@@ -103,21 +103,7 @@ export class ResponseEnvelopeInterceptor<T>
           };
         }
 
-        // Null / empty object → return empty array with pagination
-        if (
-          data === null ||
-          data === undefined ||
-          (typeof data === 'object' && Object.keys(data).length === 0)
-        ) {
-          return {
-            status: 'success',
-            code: 200,
-            data: [],
-            pagination: buildPagination(1, 10, 0),
-          };
-        }
-
-        // Single object — no pagination
+        // Single object (including empty {}) — wrap without pagination
         return {
           status: 'success',
           code: 200,
