@@ -6,8 +6,11 @@ import {
   Patch,
   Delete,
   Param,
+  Query,
   UseGuards,
   ParseUUIDPipe,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,6 +20,7 @@ import {
   ApiParam,
   ApiBody,
   ApiSecurity,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UserBodyProfileService } from './user-body-profile.service';
 import { CreateUserBodyProfileDto } from './dto/create-user-body-profile.dto';
@@ -33,6 +37,18 @@ const profileExample = {
   activityLevel: 'moderate',
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedAt: '2026-01-01T00:00:00.000Z',
+};
+
+const wrappedResponseExample = {
+  status: 'success',
+  code: 200,
+  data: [profileExample],
+  pagination: {
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 1,
+    itemsPerPage: 10,
+  },
 };
 
 @ApiTags('User Body Profile')
@@ -64,16 +80,26 @@ export class UserBodyProfileController {
 
   /**
    * GET /users/:userId/body-profile
-   * Get full body profile history of a user (ordered by latest)
+   * Get body profile history of a user with pagination (ordered by latest)
    */
   @Get()
-  @ApiOperation({ summary: 'Get body profile history of a user (array, ordered by latest)' })
+  @ApiOperation({ summary: 'Get body profile history of a user (paginated, ordered by latest)' })
   @ApiParam({ name: 'userId', type: 'string', format: 'uuid', description: 'User UUID' })
-  @ApiResponse({ status: 200, description: 'Body profile history (empty array if none)', schema: { example: [profileExample] } })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: 'Page number (default: 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: 'Items per page (default: 10)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Body profile history with pagination (wrapped by ResponseEnvelopeInterceptor)',
+    schema: { example: wrappedResponseExample },
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized – authentication required' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  findByUserId(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.service.findByUserId(userId);
+  findByUserId(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return this.service.findByUserId(userId, page, limit);
   }
 
   /**

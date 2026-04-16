@@ -6,6 +6,13 @@ import { CreateUserBodyProfileDto } from './dto/create-user-body-profile.dto';
 import { UpdateUserBodyProfileDto } from './dto/update-user-body-profile.dto';
 import { UsersService } from '../users/users.service';
 
+export interface PaginatedBodyProfile {
+  items: UserBodyProfile[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 @Injectable()
 export class UserBodyProfileService {
   constructor(
@@ -26,16 +33,28 @@ export class UserBodyProfileService {
     return this.profileRepository.save(profile);
   }
 
-  async findByUserId(userId: string): Promise<UserBodyProfile[]> {
+  /**
+   * Find body profile entries for a user with pagination support.
+   * Returns { items, total, page, limit } shape so the interceptor
+   * can build accurate pagination metadata (totalItems = actual DB count).
+   */
+  async findByUserId(
+    userId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<PaginatedBodyProfile> {
     // ensure user exists
     await this.usersService.findOne(userId);
 
-    const profiles = await this.profileRepository.find({
+    const [items, total] = await this.profileRepository.findAndCount({
       where: { userId },
       relations: ['user'],
       order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
-    return profiles;
+
+    return { items, total, page, limit };
   }
 
   /**
